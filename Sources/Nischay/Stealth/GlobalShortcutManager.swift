@@ -2,6 +2,7 @@ import AppKit
 
 /// Monitors a global backslash keypress (\) to toggle the app UI.
 /// Mirrors the "\ to toggle/hide the interface" shortcut string found in the binary.
+@MainActor
 class GlobalShortcutManager {
 
     private var globalMonitor: Any?
@@ -23,5 +24,4 @@ class GlobalShortcutManager {
         }
     }
 
-    deinit { stopMonitoring() }
 }

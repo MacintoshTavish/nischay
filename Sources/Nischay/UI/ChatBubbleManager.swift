@@ -2,6 +2,7 @@ import AppKit
 
 /// Manages the stack of chat bubble views inside ResponseViewController.
 /// Mirrors ChatBubbleManager from the RE class dump.
+@MainActor
 class ChatBubbleManager {
 
     private weak var stackView: NSStackView?

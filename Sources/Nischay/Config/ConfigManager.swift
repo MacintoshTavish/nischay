@@ -3,7 +3,7 @@ import Foundation
 /// Persistent configuration for the Nischay app.
 /// Mirrors the ConfigManager ivar set found in the RE class dump.
 /// All values persist via UserDefaults.
-class ConfigManager {
+class ConfigManager: @unchecked Sendable {
     static let shared = ConfigManager()
     private let defaults = UserDefaults.standard
 

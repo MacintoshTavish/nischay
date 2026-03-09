@@ -8,6 +8,7 @@ import AppKit
 ///
 /// Applied to: mainWindow, all childWindows, controlsWindow, chatInputWindow.
 /// This is what makes the app's windows invisible in screen share pickers ("Invisibility mode").
+@MainActor
 class StealthManager {
 
     /// Apply stealth to all app windows – matches the exact logic from decompiled applyStealth.c

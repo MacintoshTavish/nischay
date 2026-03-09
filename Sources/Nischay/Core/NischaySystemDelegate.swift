@@ -13,6 +13,7 @@ import Foundation
 ///   isVoiceModeEnabled, isAutoAnswerEnabled, isShortAnswerMode, isResponseVisible,
 ///   controlsWindow, menuWindow, useEdgeFunctionAPI, openAIAPIKey, openAIModel,
 ///   lastScreenText, isProcessingAI, captureQueue, isCapturingScreenshot, etc.
+@MainActor
 class NischaySystemDelegate: NSObject {
 
     // MARK: - Sub-managers

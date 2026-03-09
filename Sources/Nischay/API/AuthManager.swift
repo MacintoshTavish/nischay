@@ -4,7 +4,7 @@ import Foundation
 /// Handles user auth – OAuth PKCE flow via Supabase Auth.
 /// Mirrors signInWithProvider / getCurrentSession / isAuthenticated from the RE analysis.
 /// The OAuth callback arrives via the nischay:// URL scheme handled in AppDelegate.
-class AuthManager {
+class AuthManager: @unchecked Sendable {
     static let shared = AuthManager()
 
     struct UserSession {

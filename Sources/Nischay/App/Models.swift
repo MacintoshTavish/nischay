@@ -1,4 +1,5 @@
 import Foundation
+import AppKit
 
 // MARK: - Shared Data Models
 
@@ -25,10 +26,12 @@ extension Notification.Name {
 
 // MARK: - Delegate Protocols
 
+@MainActor
 protocol ScreenCaptureDelegate: AnyObject {
     func didCaptureFrame(_ image: NSImage)
 }
 
+@MainActor
 protocol ChatInputDelegate: AnyObject {
     func didSubmitQuery(_ query: String)
 }

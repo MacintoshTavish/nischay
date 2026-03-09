@@ -4,7 +4,7 @@ import Foundation
 /// Direct OpenAI API calls (chat completions + vision).
 /// Used when ConfigManager.useEdgeFunctionAPI == false or user supplies their own key.
 /// Mirrors callOpenAIAPI / callOpenAIVisionAPI from the NischaySystemDelegate RE analysis.
-class OpenAIManager {
+class OpenAIManager: @unchecked Sendable {
 
     private let endpoint = "https://api.openai.com/v1/chat/completions"
     private var apiKey: String   { ConfigManager.shared.openAIAPIKey }

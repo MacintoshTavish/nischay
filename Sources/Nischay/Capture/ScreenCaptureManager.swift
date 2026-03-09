@@ -16,15 +16,15 @@ class ScreenCaptureManager: NSObject {
 
     // MARK: - Permission
 
-    func checkAndRequestPermission(completion: @escaping (Bool) -> Void) {
+    func checkAndRequestPermission(completion: @escaping @MainActor (Bool) -> Void) {
         Task {
             do {
                 // Attempting to list shareable content triggers the macOS permission dialog
                 _ = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
-                completion(true)
+                await completion(true)
             } catch {
                 print("Nischay: Screen capture permission denied – \(error)")
-                completion(false)
+                await completion(false)
             }
         }
     }

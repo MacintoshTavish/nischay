@@ -4,6 +4,7 @@ import AppKit
 /// Mirrors ChatInputPanel, ControlsPanel, and the main NSPanel from the class dump.
 /// After creating all windows, calls StealthManager.applyStealth() so they are
 /// excluded from screen-share pickers (setSharingType:.none).
+@MainActor
 class WindowManager {
 
     private(set) var mainWindow: NSPanel?

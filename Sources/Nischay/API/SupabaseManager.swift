@@ -21,7 +21,7 @@ struct UsageCheckResult {
 /// Mirrors SupabaseManager from RE class dump ivars:
 ///   supabaseURL, supabaseAnonKey, activeStreamingSessions,
 ///   cachedSubscriptionStatus, subscriptionCacheTime, subscriptionCacheDuration
-class SupabaseManager {
+class SupabaseManager: @unchecked Sendable {
 
     private var baseURL:   String { ConfigManager.shared.supabaseURL }
     private var anonKey:   String { ConfigManager.shared.supabaseAnonKey }
@@ -95,10 +95,8 @@ class SupabaseManager {
                 if raw == "[DONE]" { break }
                 if let json = try? JSONSerialization.jsonObject(with: Data(raw.utf8)) as? [String: Any] {
                     // Support both Supabase Edge format {"content":"..."} and OpenAI delta format
-                    let chunk = json["content"] as? String
-                        ?? (json["choices"] as? [[String: Any]])?
-                            .first?["delta"] as? [String: Any]?["content"] as? String
-                        ?? ""
+                    let delta = (json["choices"] as? [[String: Any]])?.first?["delta"] as? [String: Any]
+                    let chunk = (json["content"] as? String) ?? (delta?["content"] as? String) ?? ""
                     if !chunk.isEmpty { full += chunk; onUpdate(chunk) }
                 }
             }

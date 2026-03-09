@@ -1,0 +1,24 @@
+# Nischay – .gitignore
+
+# Build artifacts
+.build/
+*.o
+*.d
+
+# Xcode
+*.xcuserstate
+xcuserdata/
+DerivedData/
+*.xcworkspace
+.swiftpm/
+
+# macOS
+.DS_Store
+*.DS_Store
+
+# Config with secrets (never commit keys)
+# ConfigManager reads from UserDefaults at runtime – no .env files to ignore
+
+# Editor
+.vscode/
+.idea/

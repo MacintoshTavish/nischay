@@ -35,12 +35,18 @@ class SupabaseManager: @unchecked Sendable {
     // MARK: - Auth headers helper
 
     private func authHeaders(session: URLSession = .shared) -> [String: String] {
-        [
+        var headers = [
             "apikey": anonKey,
-            "Authorization": "Bearer \(anonKey)",
             "Content-Type": "application/json",
             "X-Supabase-Api-Version": "2024-01-01"
         ]
+        // Send user's access token if signed in, otherwise fallback to anonKey
+        if let token = AuthManager.shared.currentSession?.accessToken {
+            headers["Authorization"] = "Bearer \(token)"
+        } else {
+            headers["Authorization"] = "Bearer \(anonKey)"
+        }
+        return headers
     }
 
     // MARK: - Screen Analysis (streaming)

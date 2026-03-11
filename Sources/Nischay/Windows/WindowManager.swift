@@ -69,17 +69,22 @@ class WindowManager {
     private func makePanel(rect: NSRect) -> NSPanel {
         let panel = NSPanel(
             contentRect: rect,
-            styleMask: [.nonactivatingPanel, .hudWindow],
+            styleMask: [.titled, .closable, .resizable, .fullSizeContentView],
             backing: .buffered,
             defer: false
         )
         panel.level = .floating
         panel.isFloatingPanel = true
         panel.hidesOnDeactivate = false
-        panel.collectionBehavior = [.canJoinAllSpaces, .stationary]
+        // Allow the panel to appear on all spaces but still accept clicks
+        panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
         panel.isMovableByWindowBackground = true
-        panel.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.96)
+        panel.backgroundColor = NSColor(calibratedWhite: 0.12, alpha: 0.97)
         panel.isReleasedWhenClosed = false
+        panel.titlebarAppearsTransparent = true
+        panel.titleVisibility = .hidden
+        // becomeKey so buttons/text can be clicked
+        panel.becomesKeyOnlyIfNeeded = false
         return panel
     }
 

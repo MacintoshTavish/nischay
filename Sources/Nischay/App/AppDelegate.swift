@@ -5,8 +5,8 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var systemDelegate: NischaySystemDelegate?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        // Make app visible in Dock for debugging
-        NSApplication.shared.setActivationPolicy(.regular)
+        // No dock icon (backup to LSUIElement in Info.plist)
+        NSApplication.shared.setActivationPolicy(.accessory)
 
         systemDelegate = NischaySystemDelegate()
         systemDelegate?.setup()

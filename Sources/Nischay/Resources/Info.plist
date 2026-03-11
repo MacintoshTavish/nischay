@@ -16,9 +16,8 @@
     <string>APPL</string>
     <key>CFBundleExecutable</key>
     <string>Nischay</string>
-    <!-- LSUIElement disabled during dev so panels can become key (re-enable for release) -->
-    <!-- <key>LSUIElement</key> -->
-    <!-- <true/> -->
+    <key>LSUIElement</key>
+    <true/>
     <key>NSHumanReadableCopyright</key>
     <string>Copyright © 2024 Nischay. All rights reserved.</string>
     <!-- Screen Recording permission -->

@@ -17,9 +17,10 @@ class ScreenCaptureManager: NSObject {
     // MARK: - Permission
 
     func checkAndRequestPermission(completion: @escaping @MainActor (Bool) -> Void) {
-        // Use only Preflight to check permission silently.
-        // CGRequestScreenCaptureAccess is intentionally avoided as it forcefully triggers a visible macOS system UI popup. 
-        let hasPermission = CGPreflightScreenCaptureAccess()
+        // Option B: Forcefully ask macOS for permission on first launch.
+        // If denied, it fails silently in the background. On the NEXT launch, it will prompt again.
+        // Once allowed, it never prompts again.
+        let hasPermission = CGRequestScreenCaptureAccess()
         
         if hasPermission {
             Task { await completion(true) }

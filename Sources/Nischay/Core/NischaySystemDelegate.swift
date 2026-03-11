@@ -26,9 +26,6 @@ class NischaySystemDelegate: NSObject {
     let config           = ConfigManager.shared
     var authManager: AuthManager { AuthManager.shared }
 
-    // MARK: - Menu Bar Item
-    var statusItem: NSStatusItem?
-
     // MARK: - App State
     var isUserAuthenticated = false
     var isChatModeEnabled   = false
@@ -64,10 +61,7 @@ class NischaySystemDelegate: NSObject {
             selector: #selector(authStateChanged),
             name: .nischayAuthStateChanged, object: nil)
 
-        // 6. Setup Menu Bar Icon
-        setupMenuBar()
-
-        // 7. Show UI on launch
+        // 6. Show UI on launch
         windowManager.showAll()
         print("Nischay: setup complete")
     }
@@ -91,40 +85,6 @@ class NischaySystemDelegate: NSObject {
             inputView.delegate = self
             inputWin.contentView = inputView
         }
-    }
-
-    private func setupMenuBar() {
-        statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-        if let button = statusItem?.button {
-            button.title = "N"
-            button.font = NSFont.boldSystemFont(ofSize: 14)
-        }
-
-        let menu = NSMenu()
-        menu.addItem(NSMenuItem(title: "Toggle Interface", action: #selector(menuToggleInterface), keyEquivalent: "i"))
-        menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Sign In via GitHub", action: #selector(menuSignIn), keyEquivalent: "s"))
-        menu.addItem(NSMenuItem.separator())
-        menu.addItem(NSMenuItem(title: "Quit Nischay", action: #selector(menuQuit), keyEquivalent: "q"))
-        
-        // Ensure menu targets self
-        for item in menu.items {
-            item.target = self
-        }
-        
-        statusItem?.menu = menu
-    }
-
-    @objc private func menuToggleInterface() {
-        toggleInterface()
-    }
-
-    @objc private func menuSignIn() {
-        authManager.signIn()
-    }
-
-    @objc private func menuQuit() {
-        NSApplication.shared.terminate(self)
     }
 
     // MARK: - Interface Toggle

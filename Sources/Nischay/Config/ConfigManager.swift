@@ -10,7 +10,7 @@ class ConfigManager: @unchecked Sendable {
     // MARK: - API Config
     // Nischay backend — exkwrnxktxamlopnyhbf.supabase.co
     private static let defaultSupabaseURL    = "https://exkwrnxktxamlopnyhbf.supabase.co"
-    private static let defaultSupabaseAnonKey = "sb_publishable_h82yNqHmjv780D-VKSTQtQ_8KNZuiH4uJNO29yfFZQm"
+    private static let defaultSupabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV4a3dybnhrdHhhbWxvcG55aGJmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMxNTk2MDIsImV4cCI6MjA4ODczNTYwMn0.cm0RT7kY0uaj6shQDRgX6Qc-ReNZiGQvjdL5Q6Pkqb0"
 
     var supabaseURL: String {
         get { defaults.string(forKey: "supabaseURL") ?? ConfigManager.defaultSupabaseURL }

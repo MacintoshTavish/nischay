@@ -27,7 +27,8 @@ class AuthManager: @unchecked Sendable {
             print("Nischay: Cannot sign in – Supabase URL not configured.")
             return
         }
-        let urlStr = "\(supabaseURL)/auth/v1/authorize?provider=github&redirect_to=nischay://auth/callback"
+        // Use implicit flow so tokens come directly in URL fragment (no code exchange needed)
+        let urlStr = "\(supabaseURL)/auth/v1/authorize?provider=github&redirect_to=nischay://auth/callback&flow_type=implicit"
         guard let url = URL(string: urlStr) else { return }
         NSWorkspace.shared.open(url)
     }

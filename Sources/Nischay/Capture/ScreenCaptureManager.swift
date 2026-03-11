@@ -17,14 +17,25 @@ class ScreenCaptureManager: NSObject {
     // MARK: - Permission
 
     func checkAndRequestPermission(completion: @escaping @MainActor (Bool) -> Void) {
-        // Option B: Forcefully ask macOS for permission on first launch.
-        // If denied, it fails silently in the background. On the NEXT launch, it will prompt again.
-        // Once allowed, it never prompts again.
-        let hasPermission = CGRequestScreenCaptureAccess()
-        
-        if hasPermission {
+        let preflight = CGPreflightScreenCaptureAccess()
+        if preflight {
+            // Already fully granted via System Settings. Silently proceed.
             Task { await completion(true) }
+            return
+        }
+
+        // Not granted yet. This triggers Option B: Forcefully ask macOS for permission on first launch.
+        let requested = CGRequestScreenCaptureAccess()
+        
+        if requested {
+            // User clicked "Open System Settings" on the initial macOS prompt.
+            // But macOS doesn't always open the correct sub-menu reliably, so we ensure it opens exactly to Screen Recording:
+            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture") {
+                NSWorkspace.shared.open(url)
+            }
+            Task { await completion(false) } // They still need to flip the toggle, so return false for now
         } else {
+            // User clicked "Deny" on the prompt. Fail silently.
             print("Nischay: Screen capture permission denied — failing completely silently. No UI alerts triggered.")
             Task { await completion(false) }
         }

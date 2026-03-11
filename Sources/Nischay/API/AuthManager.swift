@@ -81,8 +81,7 @@ class AuthManager: @unchecked Sendable {
         req.setValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
 
         let body: [String: String] = [
-            "auth_code": code,
-            "code_verifier": ""  // No PKCE verifier since we use implicit redirect
+            "code": code
         ]
         req.httpBody = try? JSONSerialization.data(withJSONObject: body)
 

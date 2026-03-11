@@ -17,15 +17,25 @@ class ScreenCaptureManager: NSObject {
     // MARK: - Permission
 
     func checkAndRequestPermission(completion: @escaping @MainActor (Bool) -> Void) {
-        Task {
-            do {
-                // Attempting to list shareable content triggers the macOS permission dialog
-                _ = try await SCShareableContent.excludingDesktopWindows(false, onScreenWindowsOnly: true)
-                await completion(true)
-            } catch {
-                print("Nischay: Screen capture permission denied – \(error)")
-                await completion(false)
+        // CGRequestScreenCaptureAccess is the correct API for macOS 14+
+        // It shows the permission dialog and handles TCC properly across builds
+        if CGPreflightScreenCaptureAccess() {
+            // Already granted — start immediately
+            Task { await completion(true) }
+            return
+        }
+
+        // Request access — this opens System Settings if previously denied
+        let granted = CGRequestScreenCaptureAccess()
+        if granted {
+            Task { await completion(true) }
+        } else {
+            print("Nischay: Screen capture permission denied — open System Settings > Privacy > Screen Recording")
+            // Open System Settings to the right page so user can enable it
+            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture") {
+                NSWorkspace.shared.open(url)
             }
+            Task { await completion(false) }
         }
     }
 

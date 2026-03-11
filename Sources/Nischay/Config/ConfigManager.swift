@@ -7,15 +7,18 @@ class ConfigManager: @unchecked Sendable {
     static let shared = ConfigManager()
     private let defaults = UserDefaults.standard
 
-    // MARK: - API Config (placeholders – fill in after setting up Supabase / OpenAI)
+    // MARK: - API Config
+    // Nischay backend — exkwrnxktxamlopnyhbf.supabase.co
+    private static let defaultSupabaseURL    = "https://exkwrnxktxamlopnyhbf.supabase.co"
+    private static let defaultSupabaseAnonKey = "sb_publishable_h82yNqHmjv780D-VKSTQtQ_8KNZuiH4uJNO29yfFZQm"
 
     var supabaseURL: String {
-        get { defaults.string(forKey: "supabaseURL") ?? "" }
+        get { defaults.string(forKey: "supabaseURL") ?? ConfigManager.defaultSupabaseURL }
         set { defaults.set(newValue, forKey: "supabaseURL") }
     }
 
     var supabaseAnonKey: String {
-        get { defaults.string(forKey: "supabaseAnonKey") ?? "" }
+        get { defaults.string(forKey: "supabaseAnonKey") ?? ConfigManager.defaultSupabaseAnonKey }
         set { defaults.set(newValue, forKey: "supabaseAnonKey") }
     }
 
@@ -45,8 +48,13 @@ class ConfigManager: @unchecked Sendable {
     // MARK: - Feature Flags
 
     /// When true, screen analysis goes via Supabase Edge Function; else uses local OpenAI key.
+    /// Defaults to TRUE — always use our backend.
     var useEdgeFunctionAPI: Bool {
-        get { defaults.bool(forKey: "useEdgeFunctionAPI") }
+        get {
+            // If never explicitly set, default to true (use our Edge Function)
+            if defaults.object(forKey: "useEdgeFunctionAPI") == nil { return true }
+            return defaults.bool(forKey: "useEdgeFunctionAPI")
+        }
         set { defaults.set(newValue, forKey: "useEdgeFunctionAPI") }
     }
 

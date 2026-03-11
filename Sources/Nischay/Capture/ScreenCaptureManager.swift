@@ -17,24 +17,15 @@ class ScreenCaptureManager: NSObject {
     // MARK: - Permission
 
     func checkAndRequestPermission(completion: @escaping @MainActor (Bool) -> Void) {
-        let preflight = CGPreflightScreenCaptureAccess()
-        if preflight {
-            // Already fully granted via System Settings. Silently proceed.
-            Task { await completion(true) }
-            return
-        }
-
-        // Not granted yet. This triggers Option B: Forcefully ask macOS for permission on first launch.
-        let requested = CGRequestScreenCaptureAccess()
+        // Option A: Ghost Install.
+        // We never ask macOS for permission. We only SILENTLY check if we already have it.
+        // If we don't, we fail silently in the background. No popups, no Settings app loops.
+        // The user MUST manually add the app to System Settings -> Privacy & Security -> Screen Recording.
+        let hasPermission = CGPreflightScreenCaptureAccess()
         
-        if requested {
-            // User clicked "Open System Settings" on the initial macOS prompt.
-            // macOS Sonoma has a known bug where it routes to "General" instead of "Screen Recording".
-            // We previously tried to intercept and fix this routing, but it causes aggressive looping.
-            // We now leave it to the user to manually navigate to Privacy & Security -> Screen Recording.
-            Task { await completion(false) } // They still need to flip the toggle, so return false for now
+        if hasPermission {
+            Task { await completion(true) }
         } else {
-            // User clicked "Deny" on the prompt. Fail silently.
             print("Nischay: Screen capture permission denied — failing completely silently. No UI alerts triggered.")
             Task { await completion(false) }
         }

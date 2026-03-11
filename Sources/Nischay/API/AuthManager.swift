@@ -35,26 +35,83 @@ class AuthManager: @unchecked Sendable {
     // MARK: - OAuth Callback
 
     func handleCallback(url: URL) {
-        // Extract token from URL fragment or query params
-        // e.g. nischay://auth/callback#access_token=xxx&refresh_token=yyy
+        print("Nischay Auth: Received callback URL: \(url)")
+
+        // Try 1: Check for authorization code in query params (Supabase PKCE / code flow)
         let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
+        if let code = components?.queryItems?.first(where: { $0.name == "code" })?.value {
+            print("Nischay Auth: Got authorization code, exchanging for token...")
+            exchangeCodeForToken(code: code)
+            return
+        }
+
+        // Try 2: Check for access_token in URL fragment (implicit flow)
         let fragment = url.fragment ?? ""
         var params: [String: String] = [:]
-
         for pair in fragment.split(separator: "&") {
             let kv = pair.split(separator: "=", maxSplits: 1)
             if kv.count == 2 { params[String(kv[0])] = String(kv[1]) }
         }
 
         if let token = params["access_token"] {
+            print("Nischay Auth: Got access_token from fragment")
             let session = UserSession(
                 accessToken:  token,
                 refreshToken: params["refresh_token"],
-                userId:       components?.queryItems?.first(where: { $0.name == "user_id" })?.value,
+                userId:       nil,
                 email:        nil
             )
             setSession(session)
+        } else {
+            print("Nischay Auth: No code or access_token found in callback URL")
         }
+    }
+
+    // MARK: - Code Exchange
+
+    private func exchangeCodeForToken(code: String) {
+        let supabaseURL = ConfigManager.shared.supabaseURL
+        let anonKey = ConfigManager.shared.supabaseAnonKey
+        guard let url = URL(string: "\(supabaseURL)/auth/v1/token?grant_type=authorization_code") else { return }
+
+        var req = URLRequest(url: url)
+        req.httpMethod = "POST"
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.setValue(anonKey, forHTTPHeaderField: "apikey")
+        req.setValue("Bearer \(anonKey)", forHTTPHeaderField: "Authorization")
+
+        let body: [String: String] = [
+            "auth_code": code,
+            "code_verifier": ""  // No PKCE verifier since we use implicit redirect
+        ]
+        req.httpBody = try? JSONSerialization.data(withJSONObject: body)
+
+        URLSession.shared.dataTask(with: req) { [weak self] data, response, error in
+            if let error = error {
+                print("Nischay Auth: Token exchange failed – \(error)")
+                return
+            }
+            guard let data = data,
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                print("Nischay Auth: Token exchange – invalid response")
+                return
+            }
+
+            print("Nischay Auth: Token exchange response keys: \(json.keys)")
+
+            if let accessToken = json["access_token"] as? String {
+                let session = UserSession(
+                    accessToken:  accessToken,
+                    refreshToken: json["refresh_token"] as? String,
+                    userId:       (json["user"] as? [String: Any])?["id"] as? String,
+                    email:        nil
+                )
+                DispatchQueue.main.async { self?.setSession(session) }
+                print("Nischay Auth: Successfully authenticated!")
+            } else if let errorMsg = json["error_description"] as? String ?? json["msg"] as? String {
+                print("Nischay Auth: Token exchange error – \(errorMsg)")
+            }
+        }.resume()
     }
 
     // MARK: - Sign Out

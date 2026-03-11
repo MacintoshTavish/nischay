@@ -16,9 +16,9 @@
     <string>APPL</string>
     <key>CFBundleExecutable</key>
     <string>Nischay</string>
-    <!-- No Dock icon – runs as background menu-bar agent (mirrors LSUIElement=1 from original) -->
-    <key>LSUIElement</key>
-    <true/>
+    <!-- LSUIElement disabled during dev so panels can become key (re-enable for release) -->
+    <!-- <key>LSUIElement</key> -->
+    <!-- <true/> -->
     <key>NSHumanReadableCopyright</key>
     <string>Copyright © 2024 Nischay. All rights reserved.</string>
     <!-- Screen Recording permission -->

@@ -108,7 +108,6 @@ class NischaySystemDelegate: NSObject {
 
         if useEdge {
             Task {
-                // Check usage before calling Edge Function (exactly as in decompiled binary)
                 let usage = await supabaseManager.checkFeatureUsage(.screenAnalysis, amount: 1.0)
                 guard usage.allowed else {
                     await MainActor.run {
@@ -136,11 +135,20 @@ class NischaySystemDelegate: NSObject {
                 )
             }
         } else if hasOAI {
+            // Convert NSImage → base64 String HERE on MainActor (Sendable-safe)
+            let imageBase64: String? = image.flatMap { img in
+                guard let tiff = img.tiffRepresentation,
+                      let bmp  = NSBitmapImageRep(data: tiff),
+                      let jpeg = bmp.representation(using: .jpeg, properties: [.compressionFactor: 0.8])
+                else { return nil }
+                return jpeg.base64EncodedString()
+            }
+            let useVision = config.useVisionMode
             Task {
                 do {
                     let response: String
-                    if let img = image, config.useVisionMode {
-                        response = try await openAIManager.callVisionAPI(prompt: prompt, image: img)
+                    if let base64 = imageBase64, useVision {
+                        response = try await openAIManager.callVisionAPI(prompt: prompt, imageBase64: base64)
                     } else {
                         response = try await openAIManager.callChatAPI(prompt: prompt)
                     }
@@ -211,7 +219,7 @@ extension NischaySystemDelegate: ScreenCaptureDelegate {
         ocrManager.extractText(from: image) { [weak self] text in
             guard let self, !text.isEmpty,
                   text.count >= self.config.minTextLength else { return }
-            self.lastScreenText = text
+            DispatchQueue.main.async { self.lastScreenText = text }
         }
     }
 }

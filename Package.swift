@@ -22,5 +22,5 @@ let package = Package(
             path: "Tests/NischayTests"
         )
     ],
-    swiftLanguageVersions: [.v5]
+    swiftLanguageModes: [.v5]
 )

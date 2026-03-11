@@ -25,19 +25,24 @@ class OpenAIManager: @unchecked Sendable {
 
     // MARK: - Vision (image + text)
 
-    func callVisionAPI(prompt: String, image: NSImage) async throws -> String {
+    /// Sendable-safe overload: accepts pre-encoded base64 JPEG string.
+    func callVisionAPI(prompt: String, imageBase64: String) async throws -> String {
         guard !apiKey.isEmpty else { throw NischayError.noAPIKey }
-
-        guard let base64 = imageToBase64JPEG(image) else { throw NischayError.encodingFailed }
-
         let messages: [[String: Any]] = [
             ["role": "system", "content": "You are a helpful AI assistant that analyzes screen content and answers questions."],
             ["role": "user", "content": [
                 ["type": "text",      "text": prompt],
-                ["type": "image_url", "image_url": ["url": "data:image/jpeg;base64,\(base64)"]]
+                ["type": "image_url", "image_url": ["url": "data:image/jpeg;base64,\(imageBase64)"]]
             ]]
         ]
         return try await sendRequest(messages: messages)
+    }
+
+    /// Convenience overload for on-actor callers (NSImage stays on MainActor).
+    func callVisionAPI(prompt: String, image: NSImage) async throws -> String {
+        guard !apiKey.isEmpty else { throw NischayError.noAPIKey }
+        guard let base64 = imageToBase64JPEG(image) else { throw NischayError.encodingFailed }
+        return try await callVisionAPI(prompt: prompt, imageBase64: base64)
     }
 
     // MARK: - Shared request

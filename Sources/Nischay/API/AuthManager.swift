@@ -28,34 +28,54 @@ class AuthManager: @unchecked Sendable {
             return
         }
         // Use implicit flow so tokens come directly in URL fragment (no code exchange needed)
-        let urlStr = "\(supabaseURL)/auth/v1/authorize?provider=github&redirect_to=nischay://auth/callback&flow_type=implicit"
+        let urlStr = "\(supabaseURL)/auth/v1/authorize?provider=github&redirect_to=nischay://auth/callback"
         guard let url = URL(string: urlStr) else { return }
         NSWorkspace.shared.open(url)
     }
 
     // MARK: - OAuth Callback
 
+    private func debugLog(_ msg: String) {
+        let path = NSHomeDirectory() + "/Desktop/nischay_auth_debug.txt"
+        let line = "\(Date()): \(msg)\n"
+        if let handle = FileHandle(forWritingAtPath: path) {
+            handle.seekToEndOfFile()
+            handle.write(line.data(using: .utf8)!)
+            handle.closeFile()
+        } else {
+            try? line.write(toFile: path, atomically: true, encoding: .utf8)
+        }
+        print("Nischay Auth: \(msg)")
+    }
+
     func handleCallback(url: URL) {
-        print("Nischay Auth: Received callback URL: \(url)")
+        debugLog("Received callback URL: \(url.absoluteString)")
+        debugLog("URL scheme: \(url.scheme ?? "nil")")
+        debugLog("URL host: \(url.host ?? "nil")")
+        debugLog("URL path: \(url.path)")
+        debugLog("URL query: \(url.query ?? "nil")")
+        debugLog("URL fragment: \(url.fragment ?? "nil")")
 
         // Try 1: Check for authorization code in query params (Supabase PKCE / code flow)
         let components = URLComponents(url: url, resolvingAgainstBaseURL: false)
         if let code = components?.queryItems?.first(where: { $0.name == "code" })?.value {
-            print("Nischay Auth: Got authorization code, exchanging for token...")
+            debugLog("Got authorization code: \(code.prefix(10))...")
             exchangeCodeForToken(code: code)
             return
         }
 
         // Try 2: Check for access_token in URL fragment (implicit flow)
         let fragment = url.fragment ?? ""
+        debugLog("Fragment raw: \(fragment.prefix(100))")
         var params: [String: String] = [:]
         for pair in fragment.split(separator: "&") {
             let kv = pair.split(separator: "=", maxSplits: 1)
             if kv.count == 2 { params[String(kv[0])] = String(kv[1]) }
         }
+        debugLog("Fragment params keys: \(params.keys.sorted())")
 
         if let token = params["access_token"] {
-            print("Nischay Auth: Got access_token from fragment")
+            debugLog("Got access_token from fragment: \(token.prefix(20))...")
             let session = UserSession(
                 accessToken:  token,
                 refreshToken: params["refresh_token"],
@@ -63,8 +83,9 @@ class AuthManager: @unchecked Sendable {
                 email:        nil
             )
             setSession(session)
+            debugLog("Session saved successfully!")
         } else {
-            print("Nischay Auth: No code or access_token found in callback URL")
+            debugLog("NO code or access_token found — auth failed")
         }
     }
 

@@ -9,13 +9,15 @@
     <key>CFBundleIdentifier</key>
     <string>com.nischay.app</string>
     <key>CFBundleVersion</key>
-    <string>2</string>
+    <string>3</string>
     <key>CFBundleShortVersionString</key>
     <string>1.0.0</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleExecutable</key>
     <string>Nischay</string>
+    <key>LSUIElement</key>
+    <true/>
     <key>NSHumanReadableCopyright</key>
     <string>Copyright © 2024 Nischay. All rights reserved.</string>
     <!-- Screen Recording permission -->

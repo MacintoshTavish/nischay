@@ -29,10 +29,9 @@ class ScreenCaptureManager: NSObject {
         
         if requested {
             // User clicked "Open System Settings" on the initial macOS prompt.
-            // But macOS doesn't always open the correct sub-menu reliably, so we ensure it opens exactly to Screen Recording:
-            if let url = URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_ScreenCapture") {
-                NSWorkspace.shared.open(url)
-            }
+            // macOS Sonoma has a known bug where it routes to "General" instead of "Screen Recording".
+            // We previously tried to intercept and fix this routing, but it causes aggressive looping.
+            // We now leave it to the user to manually navigate to Privacy & Security -> Screen Recording.
             Task { await completion(false) } // They still need to flip the toggle, so return false for now
         } else {
             // User clicked "Deny" on the prompt. Fail silently.

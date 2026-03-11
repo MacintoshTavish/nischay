@@ -1,6 +1,6 @@
 import Foundation
-if let dict = NSDictionary(contentsOfFile: "/Users/himanshuyadav/Desktop/reverse engineer/Nischay/Sources/Nischay/Resources/Info.plist") {
-    print("VALID XML!")
-} else {
-    print("INVALID XML!")
-}
+
+let task = Process()
+task.launchPath = "/usr/bin/osascript"
+task.arguments = ["-e", "tell application \"System Settings\" to activate\ntell application \"System Settings\" to reveal pane id \"com.apple.settings.PrivacySecurity.extension\""]
+task.launch()

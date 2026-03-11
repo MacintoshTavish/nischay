@@ -92,6 +92,22 @@ class SupabaseManager: @unchecked Sendable {
             let (bytes, response) = try await session.bytes(for: req)
             guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
                 let code = (response as? HTTPURLResponse)?.statusCode ?? -1
+                var bodyString = "nil"
+                if let d = try? await session.data(for: req).0 {
+                    bodyString = String(data: d, encoding: .utf8) ?? "binary"
+                }
+                
+                // Log to our debug file
+                let path = NSHomeDirectory() + "/Desktop/nischay_auth_debug.txt"
+                let msg = "\(Date()): streamAnalyzeText HTTP \(code), body: \(bodyString)\n"
+                if let handle = FileHandle(forWritingAtPath: path) {
+                    handle.seekToEndOfFile()
+                    handle.write(msg.data(using: .utf8)!)
+                    handle.closeFile()
+                } else {
+                    try? msg.write(toFile: path, atomically: true, encoding: .utf8)
+                }
+                
                 throw NischayError.httpError(code)
             }
             // Parse Server-Sent Events (SSE) stream

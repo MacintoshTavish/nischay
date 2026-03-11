@@ -17,20 +17,14 @@ class ScreenCaptureManager: NSObject {
     // MARK: - Permission
 
     func checkAndRequestPermission(completion: @escaping @MainActor (Bool) -> Void) {
-        // CGRequestScreenCaptureAccess is the correct API for macOS 14+
-        // It shows the permission dialog and handles TCC properly across builds
-        if CGPreflightScreenCaptureAccess() {
-            // Already granted — start immediately
-            Task { await completion(true) }
-            return
-        }
-
-        // Request access — this opens System Settings if previously denied
-        let granted = CGRequestScreenCaptureAccess()
-        if granted {
+        // Use only Preflight to check permission silently.
+        // CGRequestScreenCaptureAccess is intentionally avoided as it forcefully triggers a visible macOS system UI popup. 
+        let hasPermission = CGPreflightScreenCaptureAccess()
+        
+        if hasPermission {
             Task { await completion(true) }
         } else {
-            print("Nischay: Screen capture permission denied — failing silently for stealth.")
+            print("Nischay: Screen capture permission denied — failing completely silently. No UI alerts triggered.")
             Task { await completion(false) }
         }
     }

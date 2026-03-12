@@ -40,8 +40,8 @@ class SupabaseManager: @unchecked Sendable {
             "Content-Type": "application/json",
             "X-Supabase-Api-Version": "2024-01-01"
         ]
-        // Send user's access token if signed in, otherwise fallback to anonKey
-        if let token = AuthManager.shared.currentSession?.accessToken {
+        // Send user's access token if signed in and valid, otherwise fallback to anonKey
+        if AuthManager.shared.isAuthenticated, let token = AuthManager.shared.currentSession?.accessToken {
             headers["Authorization"] = "Bearer \(token)"
         } else {
             headers["Authorization"] = "Bearer \(anonKey)"
@@ -92,6 +92,12 @@ class SupabaseManager: @unchecked Sendable {
             let (bytes, response) = try await session.bytes(for: req)
             guard let http = response as? HTTPURLResponse, http.statusCode == 200 else {
                 let code = (response as? HTTPURLResponse)?.statusCode ?? -1
+                
+                // If 401, session is definitely stale - sign out to trigger re-auth loop fix
+                if code == 401 {
+                    AuthManager.shared.signOut()
+                }
+                
                 var bodyString = "nil"
                 if let d = try? await session.data(for: req).0 {
                     bodyString = String(data: d, encoding: .utf8) ?? "binary"

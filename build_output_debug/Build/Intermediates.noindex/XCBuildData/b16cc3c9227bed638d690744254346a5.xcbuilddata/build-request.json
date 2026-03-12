@@ -1,0 +1,68 @@
+{
+  "buildCommand" : {
+    "command" : "build",
+    "skipDependencies" : false,
+    "style" : "buildOnly"
+  },
+  "configuredTargets" : [
+    {
+      "guid" : "PACKAGE-PRODUCT:Nischay"
+    }
+  ],
+  "containerPath" : "/Users/himanshuyadav/Desktop/reverse engineer/Nischay",
+  "continueBuildingAfterErrors" : false,
+  "dependencyScope" : "workspace",
+  "enableIndexBuildArena" : false,
+  "hideShellScriptEnvironment" : false,
+  "parameters" : {
+    "action" : "build",
+    "activeArchitecture" : "arm64e",
+    "activeRunDestination" : {
+      "disableOnlyActiveArch" : false,
+      "platform" : "macosx",
+      "sdk" : "macosx15.2",
+      "sdkVariant" : "macos",
+      "supportedArchitectures" : [
+        "arm64e",
+        "arm64",
+        "x86_64"
+      ],
+      "targetArchitecture" : "arm64e"
+    },
+    "arenaInfo" : {
+      "buildIntermediatesPath" : "/Users/himanshuyadav/Desktop/reverse engineer/Nischay/build_output_debug/Build/Intermediates.noindex",
+      "buildProductsPath" : "/Users/himanshuyadav/Desktop/reverse engineer/Nischay/build_output_debug/Build/Products",
+      "derivedDataPath" : "/Users/himanshuyadav/Desktop/reverse engineer/Nischay/build_output_debug",
+      "indexDataStoreFolderPath" : "/Users/himanshuyadav/Desktop/reverse engineer/Nischay/build_output_debug/Index.noindex/DataStore",
+      "indexEnableDataStore" : true,
+      "indexPCHPath" : "/Users/himanshuyadav/Desktop/reverse engineer/Nischay/build_output_debug/Index.noindex/PrecompiledHeaders",
+      "pchPath" : "/Users/himanshuyadav/Desktop/reverse engineer/Nischay/build_output_debug/Build/Intermediates.noindex/PrecompiledHeaders"
+    },
+    "configurationName" : "Release",
+    "overrides" : {
+      "commandLine" : {
+        "table" : {
+
+        }
+      },
+      "synthesized" : {
+        "table" : {
+          "ACTION" : "build",
+          "CLANG_COVERAGE_MAPPING" : "YES",
+          "CLANG_PROFILE_DATA_DIRECTORY" : "/Users/himanshuyadav/Desktop/reverse engineer/Nischay/build_output_debug/Build/ProfileData",
+          "COLOR_DIAGNOSTICS" : "YES",
+          "diagnostic_message_length" : "24",
+          "ENABLE_PREVIEWS" : "NO",
+          "ENABLE_XOJIT_PREVIEWS" : "YES",
+          "ONLY_ACTIVE_ARCH" : "YES"
+        }
+      }
+    }
+  },
+  "schemeCommand" : "launch",
+  "showNonLoggedProgress" : true,
+  "useDryRun" : false,
+  "useImplicitDependencies" : true,
+  "useLegacyBuildLocations" : false,
+  "useParallelTargets" : true
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Screen Recording (required for ScreenCaptureKit) -->
+    <key>com.apple.security.device.camera</key>
+    <false/>
+    <key>com.apple.security.screen-capture</key>
+    <true/>
+    <!-- Allow unsigned executable memory (Swift concurrency) -->
+    <key>com.apple.security.cs.allow-unsigned-executable-memory</key>
+    <true/>
+    <!-- App Sandbox disabled – needed for global key monitoring + screen capture -->
+    <key>com.apple.security.app-sandbox</key>
+    <false/>
+</dict>
+</plist>

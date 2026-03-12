@@ -142,7 +142,7 @@ class ResponseViewController: NSViewController {
         currentResponseText = ""
     }
 
-    @objc private func signIn() { systemDelegate?.authManager.signIn() }
+    @objc private func signIn() { systemDelegate?.authManager.signInWithSupabase() }
 
     private func updateAuthUI() {
         let authed = systemDelegate?.authManager.isAuthenticated ?? false

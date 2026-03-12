@@ -31,6 +31,12 @@ class StealthPanel: NSPanel {
         self.isOpaque = false
         self.hasShadow = true
         
+        // Total Stealth Implementation:
+        // .none ensures the window is invisible to all screen capture/sharing APIs
+        self.sharingType = .none
+        // true ensures the window does not appear in system window lists or pickers
+        self.isExcludedFromWindowsMenu = true
+        
         self.isMovableByWindowBackground = isMovable
     }
     

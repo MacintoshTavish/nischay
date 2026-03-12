@@ -13,13 +13,9 @@ class StealthManager {
 
     /// Apply stealth to all app windows – matches the exact logic from decompiled applyStealth.c
     static func applyStealth(
-        mainWindow: NSWindow?,
-        controlsWindow: NSWindow?,
-        chatInputWindow: NSWindow?
+        _ windows: [NSWindow?]
     ) {
-        let targets: [NSWindow?] = [mainWindow, controlsWindow, chatInputWindow]
-
-        for window in targets {
+        for window in windows {
             guard let w = window else { continue }
             applyToWindow(w)
             // Also apply to every child window (childWindows loop from decompiled C)

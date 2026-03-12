@@ -53,13 +53,18 @@ class WindowManager: NSObject {
 
         // Apply stealth to all windows immediately after creation
         // (matches the call order in createInterface() -> applyStealth())
-        StealthManager.applyStealth(
-            mainWindow: mainWindow,
-            controlsWindow: controlsWindow,
-            chatInputWindow: chatInputWindow
-        )
-        // StealthPanels are already stealthy by nature, but we can pass them if StealthManager supports it.
-        // For now, we just rely on StealthPanel's explicit style masks.
+        StealthManager.applyStealth([
+            mainWindow,
+            controlsWindow,
+            chatInputWindow,
+            signInWindow,
+            accessibilityWindow,
+            successWindow,
+            trialLimitsWindow,
+            instructionsWindow,
+            toolbarWindow,
+            menuWindow
+        ])
     }
 
     // MARK: - Window creation

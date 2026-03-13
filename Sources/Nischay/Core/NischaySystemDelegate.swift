@@ -15,7 +15,7 @@ import SwiftUI
 ///   controlsWindow, menuWindow, useEdgeFunctionAPI, openAIAPIKey, openAIModel,
 ///   lastScreenText, isProcessingAI, captureQueue, isCapturingScreenshot, etc.
 @MainActor
-class NischaySystemDelegate: NSObject {
+class NischaySystemDelegate: NSObject, ObservableObject {
 
     // MARK: - Sub-managers
     let windowManager    = WindowManager()
@@ -28,14 +28,20 @@ class NischaySystemDelegate: NSObject {
     var authManager: AuthManager { AuthManager.shared }
 
     // MARK: - App State
+    enum DashboardMode { case instructions, results, chat }
+    @Published var dashboardMode: DashboardMode = .instructions {
+        didSet { updateDashboardContent() }
+    }
+    
     var isUserAuthenticated = false
     var isChatModeEnabled   = false
     var isVoiceModeEnabled  = false
     var isAutoAnswerEnabled = false
     var isResponseVisible   = false
-    var chatHistory: [ChatMessage] = []
+    @Published var chatHistory: [ChatMessage] = []
+    @Published var currentResponseText = ""
     var lastScreenText = ""
-    var isProcessingAI = false
+    @Published var isProcessingAI = false
 
     // MARK: - Setup
 
@@ -77,46 +83,31 @@ class NischaySystemDelegate: NSObject {
         let isTrusted = AXIsProcessTrusted()
         let isAuthd = authManager.isAuthenticated
         
-        // 1. Reset all modals and functional UI to a clean base state
+        // 1. Reset all modals to a clean base state
         windowManager.hideAllModals()
-        windowManager.hideMainInterface()
         windowManager.hideOperationalUI()
         
-        // 2. AUTH LAYER: This is the absolute requirement for user identity.
+        // 2. AUTH LAYER
         if !isAuthd {
-            // User needs to login - Show Sign-In flow and STOP here.
             windowManager.showAuthFlow()
             return
         }
         
-        // 3. OPERATIONAL LAYER: User IS authenticated! 
-        // We show the main "Login Bar" (Toolbar) and load history immediately.
+        // 3. OPERATIONAL LAYER
         windowManager.showOperationalUI()
         loadChatHistory()
         
-        // 4. PERMISSION LAYER: This is a requirement for features (hotkeys).
-        // If missing AND not skipped, we overlay the prompt.
+        // 4. PERMISSION LAYER
         if !isTrusted && !hasSkippedAccessibility {
             windowManager.showAccessibilityModal()
         }
     }
 
     private func setupWindowContent() {
-        // Main Core panels
-        if let mainWindow = windowManager.mainWindow {
-            let splitVC = MainSplitViewController()
-            splitVC.systemDelegate = self
-            mainWindow.contentViewController = splitVC
-        }
-        if let ctrlWin = windowManager.controlsWindow {
-            let ctrlVC = ControlsViewController()
-            ctrlVC.systemDelegate = self
-            ctrlWin.contentViewController = ctrlVC
-        }
-        if let inputWin = windowManager.chatInputWindow {
-            let inputView = ChatInputView()
-            inputView.delegate = self
-            inputWin.contentView = inputView
+        // Operational Dashboard
+        if let dashboardWin = windowManager.dashboardWindow {
+            let dashboardView = UnifiedDashboardView(systemDelegate: self)
+            dashboardWin.contentView = NSHostingView(rootView: dashboardView)
         }
         
         // Twin Initial Modals
@@ -176,10 +167,6 @@ class NischaySystemDelegate: NSObject {
             trialWin.contentView = NSHostingView(rootView: trialView)
         }
         
-        if let instructionsWin = windowManager.instructionsWindow {
-            let instructionsView = InstructionsOverlayView()
-            instructionsWin.contentView = NSHostingView(rootView: instructionsView)
-        }
         
         if let toolbarWin = windowManager.toolbarWindow {
             let toolbarView = PillToolbarView(
@@ -194,11 +181,10 @@ class NischaySystemDelegate: NSObject {
                     }
                 },
                 onChat: { [weak self] in
-                    self?.isChatModeEnabled.toggle()
-                    if self?.isChatModeEnabled == true {
-                        self?.windowManager.showMainInterface()
+                    if self?.dashboardMode == .chat {
+                        self?.dashboardMode = .instructions
                     } else {
-                        self?.windowManager.hideMainInterface()
+                        self?.dashboardMode = .chat
                     }
                 },
                 onMenu: { [weak self] in
@@ -227,8 +213,19 @@ class NischaySystemDelegate: NSObject {
     // MARK: - Interface Toggle
 
     func toggleInterface() {
-        guard let main = windowManager.mainWindow else { return }
-        if main.isVisible { windowManager.hideMainInterface() } else { windowManager.showMainInterface() }
+        guard let dashboard = windowManager.instructionsWindow else { return }
+        if dashboard.isVisible {
+            windowManager.hideOperationalUI()
+        } else {
+            windowManager.showOperationalUI()
+        }
+    }
+    
+    private func updateDashboardContent() {
+        // Redraw or notify the UnifiedDashboardView to switch its internal state.
+        // Since we are using SwiftUI, updating the state in the delegate (which is observed)
+        // will naturally trigger a re-render if the view is set up correctly.
+        broadcast(.nischayAnalysisUpdate, "") // Trick to refresh if needed, but better to use proper state
     }
 
     // MARK: - Screen Analysis
@@ -239,6 +236,8 @@ class NischaySystemDelegate: NSObject {
     func analyzeScreenContentForChat(screenText: String, image: NSImage?, userQuery: String) {
         guard !isProcessingAI else { return }
         isProcessingAI = true
+        dashboardMode = .results 
+        currentResponseText = ""
 
         let useEdge  = config.useEdgeFunctionAPI && !config.supabaseURL.isEmpty
         let hasOAI   = !config.openAIAPIKey.isEmpty
@@ -259,15 +258,21 @@ class NischaySystemDelegate: NSObject {
                     requestType: "chat",
                     useShortMode: config.isShortAnswerMode,
                     onUpdate: { [weak self] chunk in
-                        DispatchQueue.main.async { self?.broadcast(.nischayAnalysisUpdate, chunk) }
+                        DispatchQueue.main.async { 
+                            self?.currentResponseText += chunk
+                            self?.broadcast(.nischayAnalysisUpdate, chunk) 
+                        }
                     },
                     onComplete: { [weak self] result in
                         guard let self else { return }
-                        DispatchQueue.main.async { self.isProcessingAI = false }
-                        if case .success(let text) = result {
-                            self.saveChatMessage(ChatMessage(role: "assistant", content: text, timestamp: Date()))
-                        } else if case .failure(let err) = result {
-                            DispatchQueue.main.async { self.broadcast(.nischayAnalysisError, err.localizedDescription) }
+                        DispatchQueue.main.async { 
+                            self.isProcessingAI = false 
+                            if case .success(let text) = result {
+                                self.saveChatMessage(ChatMessage(role: "assistant", content: text, timestamp: Date()))
+                                self.currentResponseText = ""
+                            } else if case .failure(let err) = result {
+                                self.broadcast(.nischayAnalysisError, err.localizedDescription)
+                            }
                         }
                     }
                 )
@@ -292,8 +297,10 @@ class NischaySystemDelegate: NSObject {
                     }
                     await MainActor.run {
                         self.isProcessingAI = false
-                        self.broadcast(.nischayAnalysisUpdate, response)
+                        self.currentResponseText = response
                         self.saveChatMessage(ChatMessage(role: "assistant", content: response, timestamp: Date()))
+                        self.currentResponseText = ""
+                        self.broadcast(.nischayAnalysisUpdate, response)
                     }
                 } catch {
                     await MainActor.run {

@@ -7,9 +7,7 @@ import AppKit
 @MainActor
 class WindowManager: NSObject {
 
-    private(set) var mainWindow: NSPanel?
-    private(set) var controlsWindow: NSPanel?
-    private(set) var chatInputWindow: NSPanel?
+    private(set) var dashboardWindow: StealthPanel?
     private(set) var menuWindow: NSPanel?
     
     // Auth & Permission Modals
@@ -33,18 +31,9 @@ class WindowManager: NSObject {
 
     func createAllWindows(delegate: NischaySystemDelegate) {
         self.delegate = delegate
-        createMainWindow()
-        createControlsWindow()
-        createChatInputWindow()
-        
-        // Modals
-        createSignInWindow()
-        createAccessibilityWindow()
-        createSuccessWindow()
-        
         // Operational
         createTrialLimitsWindow()
-        createInstructionsWindow()
+        createDashboardWindow()
         createToolbarWindow()
         createMenuWindow()
 
@@ -52,16 +41,12 @@ class WindowManager: NSObject {
 
 
         // Apply stealth to all windows immediately after creation
-        // (matches the call order in createInterface() -> applyStealth())
         StealthManager.applyStealth([
-            mainWindow,
-            controlsWindow,
-            chatInputWindow,
+            dashboardWindow,
             signInWindow,
             accessibilityWindow,
             successWindow,
             trialLimitsWindow,
-            instructionsWindow,
             toolbarWindow,
             menuWindow
         ])
@@ -69,36 +54,6 @@ class WindowManager: NSObject {
 
     // MARK: - Window creation
 
-    private func createMainWindow() {
-        let screen = NSScreen.main ?? NSScreen.screens[0]
-        let f = screen.visibleFrame
-        let w: CGFloat = 420, h: CGFloat = 580
-        let panel = makePanel(rect: NSRect(x: f.maxX - w - 20, y: f.minY + 80, width: w, height: h))
-        panel.title = "Nischay"
-        panel.styleMask.insert([.titled, .closable, .resizable])
-        panel.titlebarAppearsTransparent = true
-        mainWindow = panel
-    }
-
-    private func createControlsWindow() {
-        let screen = NSScreen.main ?? NSScreen.screens[0]
-        let f = screen.visibleFrame
-        let w: CGFloat = 420, h: CGFloat = 72
-        // Stacked directly above main window
-        let y = f.minY + 80 + 580 + 6
-        let panel = makePanel(rect: NSRect(x: f.maxX - w - 20, y: y, width: w, height: h))
-        controlsWindow = panel
-    }
-
-    private func createChatInputWindow() {
-        let screen = NSScreen.main ?? NSScreen.screens[0]
-        let f = screen.visibleFrame
-        let w: CGFloat = 420, h: CGFloat = 56
-        // Sits directly below main window
-        let y = f.minY + 80 - h - 6
-        let panel = makePanel(rect: NSRect(x: f.maxX - w - 20, y: y, width: w, height: h))
-        chatInputWindow = panel
-    }
     
     // MARK: - Specific Phase Modals
     
@@ -157,13 +112,13 @@ class WindowManager: NSObject {
         trialLimitsWindow = panel
     }
     
-    private func createInstructionsWindow() {
+    private func createDashboardWindow() {
         let screen = NSScreen.main ?? NSScreen.screens[0]
         let f = screen.visibleFrame
-        let w: CGFloat = 500, h: CGFloat = 350
+        let w: CGFloat = 500, h: CGFloat = 450 // Dashboard size
         
-        let panel = StealthPanel(contentRect: NSRect(x: f.midX - w / 2, y: f.midY - h / 2 + 50, width: w, height: h), isMovable: true)
-        instructionsWindow = panel
+        let panel = StealthPanel(contentRect: NSRect(x: f.midX - w / 2, y: f.midY - h / 2 + 100, width: w, height: h), isMovable: true)
+        dashboardWindow = panel
     }
     
     private func createToolbarWindow() {
@@ -215,20 +170,16 @@ class WindowManager: NSObject {
     // MARK: - Toggle
 
     func toggleInterface() {
-        guard let main = mainWindow else { return }
-        if main.isVisible { hideMainInterface() } else { showMainInterface() }
+        guard let dashboard = dashboardWindow else { return }
+        if dashboard.isVisible { hideOperationalUI() } else { showOperationalUI() }
     }
 
     func showMainInterface() {
-        mainWindow?.orderFront(nil)
-        controlsWindow?.orderFront(nil)
-        chatInputWindow?.orderFront(nil)
+        dashboardWindow?.orderFront(nil)
     }
 
     func hideMainInterface() {
-        mainWindow?.orderOut(nil)
-        controlsWindow?.orderOut(nil)
-        chatInputWindow?.orderOut(nil)
+        dashboardWindow?.orderOut(nil)
     }
     
     // Auth Flow Triggers
@@ -249,15 +200,14 @@ class WindowManager: NSObject {
     }
     
     func showOperationalUI() {
-
         toolbarWindow?.makeKeyAndOrderFront(nil)
-        instructionsWindow?.orderFront(nil)
+        dashboardWindow?.orderFront(nil)
         trialLimitsWindow?.orderFront(nil)
     }
     
     func hideOperationalUI() {
         toolbarWindow?.orderOut(nil)
-        instructionsWindow?.orderOut(nil)
+        dashboardWindow?.orderOut(nil)
         trialLimitsWindow?.orderOut(nil)
     }
     
@@ -268,11 +218,11 @@ class WindowManager: NSObject {
     }
     
     func toggleInstructions() {
-        guard let instructions = instructionsWindow else { return }
-        if instructions.isVisible {
-            instructions.orderOut(nil)
+        guard let dashboard = dashboardWindow else { return }
+        if dashboard.isVisible {
+            dashboard.orderOut(nil)
         } else {
-            instructions.orderFront(nil)
+            dashboard.orderFront(nil)
         }
     }
     
@@ -299,7 +249,7 @@ class WindowManager: NSObject {
     }
 
     func setTransparency(_ alpha: CGFloat) {
-        [mainWindow, controlsWindow, chatInputWindow, instructionsWindow, toolbarWindow, trialLimitsWindow].forEach { $0?.alphaValue = alpha }
+        [dashboardWindow, toolbarWindow, trialLimitsWindow].forEach { $0?.alphaValue = alpha }
     }
 }
 
@@ -308,13 +258,13 @@ extension WindowManager: NSWindowDelegate {
     func windowDidMove(_ notification: Notification) {
         guard let movedWindow = notification.object as? NSWindow else { return }
         
-        // Sync Logic: If toolbar moves, instructions must follow in lockstep
-        if movedWindow == toolbarWindow, let instructions = instructionsWindow {
-            let offset: CGFloat = 20 // Gap between toolbar and instructions
-            let newX = movedWindow.frame.midX - instructions.frame.width / 2
+        // Sync Logic: If toolbar moves, dashboard must follow in lockstep
+        if movedWindow == toolbarWindow, let dashboard = dashboardWindow {
+            let offset: CGFloat = 20 // Gap between toolbar and dashboard
+            let newX = movedWindow.frame.midX - dashboard.frame.width / 2
             let newY = movedWindow.frame.maxY + offset
             
-            instructions.setFrameOrigin(NSPoint(x: newX, y: newY))
+            dashboard.setFrameOrigin(NSPoint(x: newX, y: newY))
         }
     }
 }

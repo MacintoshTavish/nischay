@@ -17,7 +17,6 @@ class WindowManager: NSObject {
     
     // Operational Utility Windows
     private(set) var trialLimitsWindow: StealthPanel?
-    private(set) var instructionsWindow: StealthPanel?
     private(set) var toolbarWindow: StealthPanel?
 
 
@@ -31,6 +30,10 @@ class WindowManager: NSObject {
 
     func createAllWindows(delegate: NischaySystemDelegate) {
         self.delegate = delegate
+        createSignInWindow()
+        createAccessibilityWindow()
+        createSuccessWindow()
+        
         // Operational
         createTrialLimitsWindow()
         createDashboardWindow()

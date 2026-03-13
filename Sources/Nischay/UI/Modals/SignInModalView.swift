@@ -11,8 +11,12 @@ struct SignInModalView: View {
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 24, height: 24)
                 
-                Text("Nischay")
+                Text("Nischay v2.0.5")
                     .font(.system(size: 20, weight: .bold))
+                
+                Text("Unified Build 4")
+                    .font(.system(size: 10))
+                    .foregroundColor(.secondary)
                 
                 Spacer()
                 

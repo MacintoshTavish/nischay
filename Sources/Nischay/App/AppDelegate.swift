@@ -6,7 +6,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
 
     func applicationDidFinishLaunching(_ notification: Notification) {
         // No dock icon (backup to LSUIElement in Info.plist)
-        NSApplication.shared.setActivationPolicy(.accessory)
+        NSApp.setActivationPolicy(.accessory)
 
         systemDelegate = NischaySystemDelegate()
         systemDelegate?.setup()

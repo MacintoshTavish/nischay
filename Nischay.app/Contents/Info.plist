@@ -2,43 +2,40 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleName</key>
-    <string>Nischay</string>
-    <key>CFBundleDisplayName</key>
-    <string>Nischay</string>
-    <key>CFBundleIdentifier</key>
-    <string>com.nischay.app</string>
-    <key>CFBundleVersion</key>
-    <string>3</string>
-    <key>CFBundleShortVersionString</key>
-    <string>1.0.0</string>
-    <key>CFBundlePackageType</key>
-    <string>APPL</string>
-    <key>CFBundleExecutable</key>
-    <string>Nischay</string>
-    <key>LSUIElement</key>
-    <true/>
-    <key>NSHumanReadableCopyright</key>
-    <string>Copyright © 2024 Nischay. All rights reserved.</string>
-    <!-- Screen Recording permission -->
-    <key>NSScreenCaptureUsageDescription</key>
-    <string>Nischay needs screen access to analyze what's on your screen and answer your questions.</string>
-    <!-- Accessibility (for global key monitoring) -->
-    <key>NSAppleEventsUsageDescription</key>
-    <string>Nischay uses key events for the global toggle shortcut.</string>
-    <!-- OAuth callback URL scheme -->
-    <key>CFBundleURLTypes</key>
-    <array>
-        <dict>
-            <key>CFBundleURLName</key>
-            <string>com.nischay.app.oauth</string>
-            <key>CFBundleURLSchemes</key>
-            <array>
-                <string>nischay</string>
-            </array>
-        </dict>
-    </array>
-    <key>NSPrincipalClass</key>
-    <string>NSApplication</string>
+	<key>CFBundleDisplayName</key>
+	<string>Nischay</string>
+	<key>CFBundleExecutable</key>
+	<string>Nischay</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.nischay.app</string>
+	<key>CFBundleName</key>
+	<string>Nischay</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>1.1.0</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.nischay.app.oauth</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>nischay</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleVersion</key>
+	<string>4</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSAppleEventsUsageDescription</key>
+	<string>Nischay uses key events for the global toggle shortcut.</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2024 Nischay. All rights reserved.</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+	<key>NSScreenCaptureUsageDescription</key>
+	<string>Nischay needs screen access to analyze what's on your screen and answer your questions.</string>
 </dict>
 </plist>

@@ -9,7 +9,7 @@ struct UnifiedDashboardView: View {
             // Header
             HStack {
                 Image(systemName: "person.fill.viewfinder")
-                Text("Nischay")
+                Text("Nischay v2.0.5 - Unified")
                     .font(.system(size: 18, weight: .bold))
                 Spacer()
                 

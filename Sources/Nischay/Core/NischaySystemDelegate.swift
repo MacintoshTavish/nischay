@@ -213,7 +213,7 @@ class NischaySystemDelegate: NSObject, ObservableObject {
     // MARK: - Interface Toggle
 
     func toggleInterface() {
-        guard let dashboard = windowManager.instructionsWindow else { return }
+        guard let dashboard = windowManager.dashboardWindow else { return }
         if dashboard.isVisible {
             windowManager.hideOperationalUI()
         } else {
